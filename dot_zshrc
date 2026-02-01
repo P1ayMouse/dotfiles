@@ -1,3 +1,4 @@
+cat > ~/.local/share/chezmoi/dot_zshrc <<'EOF'
 # ~/.zshrc
 # Advanced Zsh config with Zinit (macOS / Linux)
 
@@ -11,12 +12,11 @@ export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
 # ------------------------------------------------------
 ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/zinit.git"
 
-if [[ ! -d "$ZINIT_HOME" ]]; then
-  mkdir -p "$(dirname "$ZINIT_HOME")"
-  git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
+if [[ -f "$ZINIT_HOME/zinit.zsh" ]]; then
+  source "$ZINIT_HOME/zinit.zsh"
+else
+  echo "zinit not found at $ZINIT_HOME. Install it first (see README)." >&2
 fi
-
-source "$ZINIT_HOME/zinit.zsh"
 
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
@@ -89,11 +89,15 @@ bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
 
 # ------------------------------------------------------
-# FZF (if installed via brew)
+# FZF (if installed)
 # ------------------------------------------------------
 if command -v fzf >/dev/null 2>&1; then
-  source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"
-  source "$(brew --prefix)/opt/fzf/shell/completion.zsh"
+  if command -v brew >/dev/null 2>&1; then
+    source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"
+    source "$(brew --prefix)/opt/fzf/shell/completion.zsh"
+  elif [[ -f ~/.fzf.zsh ]]; then
+    source ~/.fzf.zsh
+  fi
 fi
 
 # ------------------------------------------------------
@@ -127,3 +131,4 @@ alias h='history'
 # Local overrides (not committed to dotfiles)
 # ------------------------------------------------------
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+EOF
